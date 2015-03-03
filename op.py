@@ -38,7 +38,7 @@ def op_kick(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def op_whois(word, word_eol, userdata):
-    if len (word) <2:
+    if len (word) > 0:
         print(word[2])
         
     return hexchat.EAT_ALL
