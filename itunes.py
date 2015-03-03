@@ -11,17 +11,14 @@ try:
 	import win32com.client
 	import pywintypes
 	loaded = True
-	print(__module_name__, 'version', __module_version__, 'loaded.')
 except ImportError:
-	print('You must install pywin32')
 	hexchat.command('timer 0.1 py unload iTunes')
 
 def np_cb(word, word_eol, userdata):
 	try:
 		itunes = win32com.client.Dispatch('iTunes.Application')
 	except pywintypes.com_error:
-		print("itunes: Failed to communicate with itunes. Note that this requires admin access and you should have had a UAC prompt.")
-		return hexchat.EAT_ALL
+                return hexchat.EAT_ALL
 
 	# TODO: Settings
 	try:
