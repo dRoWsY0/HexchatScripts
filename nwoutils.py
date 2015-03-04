@@ -24,7 +24,7 @@ def op_remove(word, word_eol, userdata):
 def op_kick(word, word_eol, userdata):
     users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
-    if len(word) > 1:
+    if len(word) > 0:
         hexchat.command('cs op %s' % chan)
         hexchat.command('timer 1 kickban %s' % word_eol[1])
         hexchat.command('timer 1 cs deop %s' % chan)
