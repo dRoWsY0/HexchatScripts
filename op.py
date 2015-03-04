@@ -37,8 +37,8 @@ def op_whois(word, word_eol, userdata):
     bUser = word[2]
     hexchat.command('cs op %s' % chan)
     hexchat.command('timer 1 unban *!*@%s' % bUser)
-    hexchat.command('invite %s' % userdata)
-    hexchat.command('timer 1 cs deop %s' % chan)
+    hexchat.command('timer 1.5 invite %s' % userdata)
+    hexchat.command('timer 1.7 cs deop %s' % chan)
     
     return hexchat.EAT_NONE
 
