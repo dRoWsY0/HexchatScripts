@@ -78,9 +78,17 @@ def op_unquiet(word, word_eol, userdata):
             
     return hexchat.EAT_ALL
 
+def op_recover(word, word_eol, userdata):
+    if len(word) > 0:
+        hexchat.command('cs unban %s' % word[1])
+        hexchat.command('join %s' % word[1])
+
+    return hexchat.EAT_ALL
+
 hexchat.hook_command('op', op_make)
 hexchat.hook_command('deop', op_remove)
 hexchat.hook_command('kick', op_kick)
 hexchat.hook_command('unkick', op_unkick)
 hexchat.hook_command('quiet', op_quiet)
 hexchat.hook_command('unquiet', op_unquiet)
+hexchat.hook_command('recover', op_recover)
