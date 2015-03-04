@@ -1,5 +1,4 @@
-import hexchat as hexchat
-import time
+import hexchat
 
 __module_name__ = 'NWOutils'
 __module_author__ = 'NewellWorldOrder'
@@ -56,10 +55,10 @@ def op_quiet(word, word_eol, userdata):
         for user in users:
             if user.nick.lower() == word[1].lower():
                 break
-        
+
         hexchat.command('cs op %s' % chan)
-        hexchat.command('mode %s +q *!*@%s' % (chan, user.host.split('@')[1]))
-        hexchat.command('cs deop %s' % chan)
+        hexchat.command('timer 1 mode %s +q *!*@%s' % (chan, user.host.split('@')[1]))
+        hexchat.command('timer 2 cs deop %s' % chan)
             
     return hexchat.EAT_ALL
 
@@ -70,10 +69,12 @@ def op_unquiet(word, word_eol, userdata):
         for user in users:
             if user.nick.lower() == word[1].lower():
                 break
-        
+            
+        host = user.host.split('@')[1]
+            
         hexchat.command('cs op %s' % chan)
-        hexchat.command('mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
-        hexchat.command('cs deop %s' % chan)
+        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
+        hexchat.command('timer 2 cs deop %s' % chan)
             
     return hexchat.EAT_ALL
 
