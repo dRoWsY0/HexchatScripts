@@ -73,7 +73,7 @@ def op_unquiet(word, word_eol, userdata):
         host = user.host.split('@')[1]
             
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
+        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, host))
         hexchat.command('timer 2 cs deop %s' % chan)
             
     return hexchat.EAT_ALL
