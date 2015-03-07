@@ -70,10 +70,8 @@ def op_unquiet(word, word_eol, userdata):
             if user.nick.lower() == word[1].lower():
                 break
             
-        host = user.host.split('@')[1]
-            
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, host))
+        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
         hexchat.command('timer 2 cs deop %s' % chan)
             
     return hexchat.EAT_ALL
@@ -85,6 +83,12 @@ def op_recover(word, word_eol, userdata):
 
     return hexchat.EAT_ALL
 
+def nwo_greentext(word, word_eol, userdata):
+    if len(word) > 0:
+        hexchat.command('say \00309>%s' % word_eol[1])
+
+    return hexchat.EAT_ALL
+
 hexchat.hook_command('op', op_make)
 hexchat.hook_command('deop', op_remove)
 hexchat.hook_command('kick', op_kick)
@@ -92,3 +96,4 @@ hexchat.hook_command('unkick', op_unkick)
 hexchat.hook_command('quiet', op_quiet)
 hexchat.hook_command('unquiet', op_unquiet)
 hexchat.hook_command('recover', op_recover)
+hexchat.hook_command('>', nwo_greentext)
