@@ -12,7 +12,7 @@ lastfm_username = "username"
 lastfm_password_hash = "md5hashofpassword"
 lastfm_network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=lastfm_username, password_hash=lastfm_password_hash)
 
-def np_cb(word, word_eol, userdata):
+def np(word, word_eol, userdata):
     title = lastfm_network.get_user(lastfm_username).get_now_playing().title
     artist = lastfm_network.get_user(lastfm_username).get_now_playing().artist
     
@@ -20,4 +20,4 @@ def np_cb(word, word_eol, userdata):
 
     return hexchat.EAT_ALL
 
-hexchat.hook_command('np', np_cb)
+hexchat.hook_command('np', np)
