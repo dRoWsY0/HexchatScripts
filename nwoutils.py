@@ -85,7 +85,7 @@ def op_recover(word, word_eol, userdata):
 
 def nwo_greentext(word, word_eol, userdata):
     if len(word) > 0:
-        hexchat.command('say \00309>%s' % word_eol[1])
+        hexchat.command('say \00303>%s' % word_eol[1])
 
     return hexchat.EAT_ALL
 
