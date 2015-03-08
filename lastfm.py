@@ -4,7 +4,7 @@ import pylast
 __module_name__ = 'last.fm'
 __module_author__ = 'NewellWorldOrder'
 __module_version__ = '1'
-__module_description__ = 'Announces current song playing in Foobar for Windows'
+__module_description__ = 'Announces current song playing in Last.FM'
 
 API_KEY = "API_KEY"
 API_SECRET = "API_SECRET_KEY"
