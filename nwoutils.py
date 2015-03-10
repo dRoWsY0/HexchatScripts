@@ -26,11 +26,8 @@ def op_kick(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     if len(word) > 0:
         hexchat.command('cs op %s' % chan)
-<<<<<<< HEAD
         hexchat.command('timer 1 kick %s' % word_eol[1])
-=======
         hexchat.command('timer 1 kickban %s' % word[1])
->>>>>>> origin/master
         hexchat.command('timer 1 cs deop %s' % chan)
 
     return hexchat.EAT_ALL
