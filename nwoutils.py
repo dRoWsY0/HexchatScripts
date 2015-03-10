@@ -7,18 +7,26 @@ __module_description__ = 'Stealth op commands'
 
 def op_make(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
-    if len(word) < 2:
+    if len(word) == 1:
         hexchat.command('cs op %s' % chan)
     else:
-        hexchat.command('cs op %s %s' % (chan, word[1]))
+        i = len(word) - 1
+        while i > 0:
+            hexchat.command('cs op %s %s' % (chan, word[i]))
+            i -= 1
+            
     return hexchat.EAT_ALL
 
 def op_remove(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
-    if len(word) < 2:
+    if len(word) == 1:
         hexchat.command('cs deop %s' % chan)
     else:
-        hexchat.command('cs deop %s %s' % (chan, word[1]))
+        i = len(word) - 1
+        while i > 0:
+            hexchat.command('cs deop %s %s' % (chan, word[i]))
+            i -= 1
+
     return hexchat.EAT_ALL
 
 def op_kick(word, word_eol, userdata):
