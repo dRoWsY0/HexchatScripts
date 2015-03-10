@@ -26,25 +26,30 @@ def op_kick(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     if len(word) > 0:
         hexchat.command('cs op %s' % chan)
+        hexchat.command('timer 1 kick %s' % word_eol[1])
+        hexchat.command('timer 1 cs deop %s' % chan)
+
+    return hexchat.EAT_ALL
+
+def op_kickban(word, word_eol, userdata):
+    users = hexchat.get_list('users')
+    chan = hexchat.get_info('channel')
+    if len(word) > 0:
+        hexchat.command('cs op %s' % chan)
         hexchat.command('timer 1 kickban %s' % word_eol[1])
         hexchat.command('timer 1 cs deop %s' % chan)
 
     return hexchat.EAT_ALL
 
-def op_whois(word, word_eol, userdata):
-    chan = hexchat.get_info('channel')
-    bUser = word[2]
-    hexchat.command('cs op %s' % chan)
-    hexchat.command('timer 1 unban *!*@%s' % bUser)
-    hexchat.command('timer 1.5 invite %s' % userdata)
-    hexchat.command('timer 1.7 cs deop %s' % chan)
-    
-    return hexchat.EAT_ALL
-
 def op_unkick(word, word_eol, userdata):
-    if len(word) > 1:
+    chan = hexchat.get_info('channel')
+    if len(word) == 2:
         hexchat.command('whois %s' % word[1])
-        hexchat.hook_print('WhoIs Name Line', op_whois, word[1])
+        hexchat.hook_print('WhoIs Name Line', op_unkick)
+    elif len(word) > 2:
+        hexchat.command('cs op %s' % chan)
+        hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[2]))
+        hexchat.command('timer 1.7 cs deop %s' % chan)
     
     return hexchat.EAT_ALL
 
@@ -55,11 +60,9 @@ def op_quiet(word, word_eol, userdata):
         for user in users:
             if user.nick.lower() == word[1].lower():
                 break
-
         hexchat.command('cs op %s' % chan)
         hexchat.command('timer 1 mode %s +q *!*@%s' % (chan, user.host.split('@')[1]))
         hexchat.command('timer 2 cs deop %s' % chan)
-            
     return hexchat.EAT_ALL
 
 def op_unquiet(word, word_eol, userdata):
