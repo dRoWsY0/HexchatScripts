@@ -10,7 +10,7 @@ def op_make(word, word_eol, userdata):
     if len(word) < 2:
         hexchat.command('cs op %s' % chan)
     else:
-        hexchat.command('cs op {} {}'.format(chan, word_eol[1]))
+        hexchat.command('cs op %s %s' % (chan, word[1]))
     return hexchat.EAT_ALL
 
 def op_remove(word, word_eol, userdata):
@@ -18,7 +18,7 @@ def op_remove(word, word_eol, userdata):
     if len(word) < 2:
         hexchat.command('cs deop %s' % chan)
     else:
-        hexchat.command('cs deop {} {}'.format(chan, word_eol[1]))
+        hexchat.command('cs deop %s %s' % (chan, word[1]))
     return hexchat.EAT_ALL
 
 def op_kick(word, word_eol, userdata):
@@ -26,7 +26,11 @@ def op_kick(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     if len(word) > 0:
         hexchat.command('cs op %s' % chan)
+<<<<<<< HEAD
         hexchat.command('timer 1 kick %s' % word_eol[1])
+=======
+        hexchat.command('timer 1 kickban %s' % word[1])
+>>>>>>> origin/master
         hexchat.command('timer 1 cs deop %s' % chan)
 
     return hexchat.EAT_ALL
