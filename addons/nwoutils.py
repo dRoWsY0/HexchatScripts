@@ -14,7 +14,6 @@ def op_op(word, word_eol, userdata):
         while i > 0:
             hexchat.command('cs op %s %s' % (chan, word[i]))
             i -= 1
-            
     return hexchat.EAT_ALL
 
 def op_deop(word, word_eol, userdata):
@@ -31,18 +30,16 @@ def op_deop(word, word_eol, userdata):
 def op_kick(word, word_eol, userdata):
     users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
-    if len(word) > 0:
+    if len(word) > 1:
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 kickban %s' % word_eol[1])
+        hexchat.command('timer 1 kickban %s' % word[1])
         hexchat.command('timer 1 cs deop %s' % chan)
     return hexchat.EAT_ALL
 
 def op_unban(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     if len(word) == 2:
-        cnc = hexchat.find_context(channel='freenode')
-        cnc.set()
-        cnc.command('whois %s' % word[1])
+        hexchat.command('whois %s' % word[1])
         hexchat.hook_print('WhoIs Name Line', op_unban)
     elif len(word) > 2:
         hexchat.command('cs op %s' % chan)
@@ -58,8 +55,8 @@ def op_quiet(word, word_eol, userdata):
             if user.nick.lower() == word[1].lower():
                 break
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 mode %s +q *!*@%s' % (chan, user.host.split('@')[1]))
-        hexchat.command('timer 2 cs deop %s' % chan)
+        hexchat.command('mode %s +q *!*@%s' % (chan, user.host.split('@')[1]))
+        hexchat.command('cs deop %s' % chan)
     return hexchat.EAT_ALL
 
 def op_unquiet(word, word_eol, userdata):
@@ -70,8 +67,8 @@ def op_unquiet(word, word_eol, userdata):
             if user.nick.lower() == word[1].lower():
                 break
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
-        hexchat.command('timer 2 cs deop %s' % chan)
+        hexchat.command('mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
+        hexchat.command('cs deop %s' % chan)
     return hexchat.EAT_ALL
 
 def op_recover(word, word_eol, userdata):
