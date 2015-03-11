@@ -28,7 +28,6 @@ def op_deop(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def op_kick(word, word_eol, userdata):
-    users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
     if len(word) > 1:
         hexchat.command('cs op %s' % chan)
