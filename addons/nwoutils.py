@@ -47,7 +47,7 @@ def op_unban(word, word_eol, userdata):
         hexchat.command('cs op %s' % chan)
         hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[2]))
         hexchat.command('timer 2 cs deop %s' % chan)
-        return hexchat.EAT_PLUGIN
+        return hexchat.EAT_ALL
 
 def op_quiet(word, word_eol, userdata):
     users = hexchat.get_list('users')
@@ -85,7 +85,7 @@ def op_recover(word, word_eol, userdata):
         hexchat.command('cs unban %s' % word[1])
         hexchat.command('timer 1 join %s' % word[1])
         lock = 1
-        hexchat.hook_timer(4000, op_unlock)
+        hexchat.hook_timer(10000, op_unlock)
     return hexchat.EAT_NONE
 
 def nwo_greentext(word, word_eol, userdata):
