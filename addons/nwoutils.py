@@ -53,7 +53,7 @@ def op_unban(word, word_eol, userdata):
         return hexchat.EAT_PLUGIN
     elif len(word) > 2 and userdata.lower() == 'unban':
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[1]))
+        hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[3]))
         hexchat.command('timer 2 cs deop %s' % chan)
         return hexchat.EAT_PLUGIN
 
@@ -107,7 +107,7 @@ def op_revenge(word, word_eol, userdata):
         hexchat.command('kick %s' % user)
     return hexchat.EAT_ALL
 
-def nwo_greentext(word, word_eol, userdata):
+def nwo_dankyamyams(word, word_eol, userdata):
     if len(word) > 0:
         hexchat.command('say \00303>%s' % word_eol[1])
     return hexchat.EAT_ALL
@@ -119,5 +119,5 @@ hexchat.hook_command('unban', op_unban)
 hexchat.hook_command('quiet', op_quiet)
 hexchat.hook_command('unquiet', op_unquiet)
 hexchat.hook_command('revenge', op_revenge)
-hexchat.hook_command('>', nwo_greentext)
+hexchat.hook_command('>', nwo_dankyamyams)
 hexchat.hook_print('You Kicked', op_rejoin)
