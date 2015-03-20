@@ -30,11 +30,16 @@ def op_deop(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def op_kick(word, word_eol, userdata):
+    users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
-    if len(word) > 1:
-        hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 kickban %s' % word_eol[1])
-        hexchat.command('timer 2 cs deop %s' % chan)
+    if len(word) == 2:
+        for user in users:
+            if hexchat.nickcmp(user.nick, word[1]) == 0 :
+                hexchat.command('cs op %s' % chan)
+                hexchat.command('timer 1 kickban %s' % user.nick)
+                hexchat.command('timer 1 mode %s -e *!*@%s' % (chan, user.host.split('@')[1]))
+                hexchat.command('timer 2 cs deop %s' % chan)
+                break
     return hexchat.EAT_ALL
 
 def op_unban(word, word_eol, userdata):
@@ -52,7 +57,7 @@ def op_unban(word, word_eol, userdata):
 def op_quiet(word, word_eol, userdata):
     users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
-    if len(word) > 0:
+    if len(word) == 2:
         for user in users:
             if hexchat.nickcmp(user.nick, word[1]) == 0 :
                 break
@@ -64,7 +69,7 @@ def op_quiet(word, word_eol, userdata):
 def op_unquiet(word, word_eol, userdata):
     users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
-    if len(word) > 0:
+    if len(word) == 2:
         for user in users:
             if hexchat.nickcmp(user.nick, word[1]) == 0 :
                 break
@@ -80,12 +85,16 @@ def op_unlock(userdata):
 
 def op_recover(word, word_eol, userdata):
     global lock
-    hexchat.command('join %s' % word[1])
     if lock == 0:
-        hexchat.command('cs unban %s' % word[1])
-        hexchat.command('timer 1 join %s' % word[1])
+        hexchat.command('cs unban %s' % word[0])
+        hexchat.command('timer 1 join %s' % word[0])
         lock = 1
         hexchat.hook_timer(10000, op_unlock)
+    return hexchat.EAT_NONE
+
+
+def op_rejoin(word, word_eol, userdata):
+    hexchat.command('join %s' % word[1])
     return hexchat.EAT_NONE
 
 def nwo_greentext(word, word_eol, userdata):
@@ -100,4 +109,5 @@ hexchat.hook_command('unban', op_unban)
 hexchat.hook_command('quiet', op_quiet)
 hexchat.hook_command('unquiet', op_unquiet)
 hexchat.hook_command('>', nwo_greentext)
-hexchat.hook_print('You Kicked', op_recover)
+hexchat.hook_print('You Kicked', op_rejoin)
+hexchat.hook_print('Banned', op_recover)
