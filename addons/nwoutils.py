@@ -50,12 +50,12 @@ def op_unban(word, word_eol, userdata):
     if len(word) == 2:
         hexchat.command('whois %s' % word[1])
         hexchat.hook_print('WhoIs Name Line', op_unban, userdata = 'unban')
-        return hexchat.EAT_NONE
+        return hexchat.EAT_PLUGIN
     elif len(word) > 2 and userdata.lower() == 'unban':
         hexchat.command('cs op %s' % chan)
         hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[1]))
         hexchat.command('timer 2 cs deop %s' % chan)
-        return hexchat.EAT_NONE
+        return hexchat.EAT_PLUGIN
 
 def op_quiet(word, word_eol, userdata):
     users = hexchat.get_list('users')
