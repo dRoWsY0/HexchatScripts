@@ -2,81 +2,63 @@ import hexchat
 
 __module_name__ = 'NWOutils'
 __module_author__ = 'NewellWorldOrder'
-__module_version__ = '1'
+__module_version__ = '2.0'
 __module_description__ = 'Stealth op commands'
 
-def op_op(word, word_eol, userdata):
+def nwo_op(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
+    nick = hexchat.get_info('nick')
     if len(word) == 1:
-        hexchat.command('cs op %s' % chan)
+        hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
     else:
         i = len(word) - 1
         while i > 0:
-            hexchat.command('cs op %s %s' % (chan, word[i]))
+            hexchat.command('RAW PRIVMSG ChanServ :op %s %s' % (chan, word[i]))
             i -= 1
     return hexchat.EAT_ALL
 
-def op_deop(word, word_eol, userdata):
+def nwo_deop(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
+    nick = hexchat.get_info('nick')
     if len(word) == 1:
-        hexchat.command('cs deop %s' % chan)
+        hexchat.command('RAW PRIVMSG ChanServ :deop %s' % chan)
     else:
         i = len(word) - 1
         while i > 0:
-            hexchat.command('cs deop %s %s' % (chan, word[i]))
+            hexchat.command('RAW PRIVMSG ChanServ :deop %s %s' % (chan, word[i]))
             i -= 1
     return hexchat.EAT_ALL
 
-def op_kick(word, word_eol, userdata):
+def nwo_kick(word, word_eol, userdata):
     users = hexchat.get_list('users')
     chan = hexchat.get_info('channel')
-    if len(word) > 1:
+    nick = hexchat.get_info('nick')
+    if len(word) >= 2:
         for user in users:
             if hexchat.nickcmp(user.nick, word[1]) == 0 :
-                hexchat.command('cs op %s' % chan)
-                hexchat.command('timer 1 mode %s -e *!*@%s' % (chan, user.host.split('@')[1]))
+                host = user.host.split('@')[1]
+                hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
+                hexchat.command('timer 1 RAW MODE %s -e+b *!*@%s *!*@%s' % (chan, host, host))
                 if len(word) > 2:
-                    hexchat.command('timer 1 kickban %s %s' % (user.nick, word_eol[2]))
+                    hexchat.command('timer 1 RAW KICK %s %s %s' % (chan, word[1], word_eol[2]))
                 else:
-                    hexchat.command('timer 1 kickban %s' % user.nick)
-                hexchat.command('timer 2 cs deop %s' % chan)
+                    hexchat.command('timer 1 RAW KICK %s %s' % (chan, word[1]))
+                hexchat.command('timer 2 RAW MODE %s -o *%s' % (chan, nick))
                 break
     return hexchat.EAT_ALL
 
-def op_unban(word, word_eol, userdata):
-    chan = hexchat.get_info('channel')
-    if len(word) == 2:
-        hexchat.command('whois %s' % word[1])
-        hexchat.hook_print('WhoIs Name Line', op_unban, userdata = 'unban')
-        return hexchat.EAT_PLUGIN
-    elif len(word) > 2 and userdata.lower() == 'unban':
-        hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[2]))
-        hexchat.command('timer 2 cs deop %s' % chan)
-        return hexchat.EAT_PLUGIN
+def nwo_judo(word, word_eol, userdata):
+    if len(word) == 3:
+        hexchat.command('RAW USERHOST %s' % word[1])
+        hexchat.hook_server('302', nwo_mode, userdata = word[2])
+    return hexchat.EAT_NONE
 
-def op_quiet(word, word_eol, userdata):
-    users = hexchat.get_list('users')
+def nwo_mode(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
-    if len(word) == 2:
-        for user in users:
-            if hexchat.nickcmp(user.nick, word[1]) == 0 :
-                break
-        hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 mode %s +q *!*@%s' % (chan, user.host.split('@')[1]))
-        hexchat.command('timer 2 cs deop %s' % chan)
-    return hexchat.EAT_ALL
-
-def op_unquiet(word, word_eol, userdata):
-    users = hexchat.get_list('users')
-    chan = hexchat.get_info('channel')
-    if len(word) == 2:
-        for user in users:
-            if hexchat.nickcmp(user.nick, word[1]) == 0 :
-                break
-        hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 mode %s -q *!*@%s' % (chan, user.host.split('@')[1]))
-        hexchat.command('timer 2 cs deop %s' % chan)
+    nick = hexchat.get_info('nick')
+    host = word[3].split('@')[1]
+    hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
+    hexchat.command('timer 1 RAW MODE %s %s-o *!*@%s %s' % (chan, userdata, host, nick))
     return hexchat.EAT_ALL
 
 def nwo_dankyamyams(word, word_eol, userdata):
@@ -84,10 +66,14 @@ def nwo_dankyamyams(word, word_eol, userdata):
         hexchat.command('say \00303>%s' % word_eol[1])
     return hexchat.EAT_ALL
 
-hexchat.hook_command('op', op_op)
-hexchat.hook_command('deop', op_deop)
-hexchat.hook_command('kick', op_kick)
-hexchat.hook_command('unban', op_unban)
-hexchat.hook_command('quiet', op_quiet)
-hexchat.hook_command('unquiet', op_unquiet)
+hexchat.hook_command('op', nwo_op, help='/op will op you if +o flags are set on you. /op <nickname> [<nickname>] will op others')
+hexchat.hook_command('deop', nwo_deop, help='/deop will deop you if +o flags are set for you. /deop <nickname> [<nickname>] will deop others')
+hexchat.hook_command('kick', nwo_kick, help='/kick <nickname> will temporarily op you, kickban <nickname> and deop you')
+hexchat.hook_command('judo', nwo_judo, help='/judo <nickname> <mode> will set different flags on a user in your current channel')
 hexchat.hook_command('>', nwo_dankyamyams)
+
+def nwo_unloaded(userdata):
+    hexchat.emit_print('Notice', '', '%s v%s by %s unloaded' % (__module_name__, __module_version__, __module_author__))
+    return hexchat.EAT_ALL
+hexchat.emit_print('Notice', '', '%s v%s by %s loaded' % (__module_name__, __module_version__, __module_author__))
+hexchat.hook_unload(nwo_unloaded)
