@@ -5,8 +5,6 @@ __module_author__ = 'NewellWorldOrder'
 __module_version__ = '1'
 __module_description__ = 'Stealth op commands'
 
-lock = 0
-
 def op_op(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     if len(word) == 1:
@@ -53,7 +51,7 @@ def op_unban(word, word_eol, userdata):
         return hexchat.EAT_PLUGIN
     elif len(word) > 2 and userdata.lower() == 'unban':
         hexchat.command('cs op %s' % chan)
-        hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[3]))
+        hexchat.command('timer 1 MODE %s -b *!*@%s' % (chan, word[2]))
         hexchat.command('timer 2 cs deop %s' % chan)
         return hexchat.EAT_PLUGIN
 
@@ -81,32 +79,6 @@ def op_unquiet(word, word_eol, userdata):
         hexchat.command('timer 2 cs deop %s' % chan)
     return hexchat.EAT_ALL
 
-def op_unlock(userdata):
-    global lock
-    lock = 0
-    return 0
-
-def op_unbanme(word, word_eol, userdata):
-    global lock
-    if lock == 0:
-        hexchat.command('cs unban %s' % word[0])
-        lock = 1
-        hexchat.hook_timer(10000, op_unlock)
-    return hexchat.EAT_NONE
-
-def op_rejoin(word, word_eol, userdata):
-    hexchat.command('join %s' % word[1])
-    hexchat.hook_print('Banned', op_unbanme)
-    return hexchat.EAT_NONE
-
-def op_revenge(word, word_eol, userdata):
-    chan = word[1]
-    user = word[2]
-    if len(word) == 3:
-        hexchat.command('join %s' % chan)
-        hexchat.command('kick %s' % user)
-    return hexchat.EAT_ALL
-
 def nwo_dankyamyams(word, word_eol, userdata):
     if len(word) > 0:
         hexchat.command('say \00303>%s' % word_eol[1])
@@ -118,6 +90,4 @@ hexchat.hook_command('kick', op_kick)
 hexchat.hook_command('unban', op_unban)
 hexchat.hook_command('quiet', op_quiet)
 hexchat.hook_command('unquiet', op_unquiet)
-hexchat.hook_command('revenge', op_revenge)
 hexchat.hook_command('>', nwo_dankyamyams)
-hexchat.hook_print('You Kicked', op_rejoin)
