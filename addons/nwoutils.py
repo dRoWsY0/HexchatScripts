@@ -60,7 +60,7 @@ def nwo_mode(word, word_eol, userdata):
         host = word[3].split('@')[1]
         hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
         hexchat.command('timer 1 RAW MODE %s %s-o *!*@%s %s' % (chan, userdata, host, nick))
-        return hexchat.EAT_ALL
+        return hexchat.EAT_PLUGIN
     return hexchat.EAT_PLUGIN
 
 def nwo_dankyamyams(word, word_eol, userdata):
