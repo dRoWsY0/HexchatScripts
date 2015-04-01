@@ -51,14 +51,16 @@ def nwo_judo(word, word_eol, userdata):
     if len(word) == 3:
         hexchat.command('RAW USERHOST %s' % word[1])
         hexchat.hook_server('302', nwo_mode, userdata = word[2])
-    return hexchat.EAT_NONE
+    return hexchat.EAT_ALL
 
 def nwo_mode(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     nick = hexchat.get_info('nick')
-    host = word[3].split('@')[1]
-    hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
-    hexchat.command('timer 1 RAW MODE %s %s-o *!*@%s %s' % (chan, userdata, host, nick))
+    if userdata:
+        host = word[3].split('@')[1]
+        hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
+        hexchat.command('timer 1 RAW MODE %s %s-o *!*@%s %s' % (chan, userdata, host, nick))
+        return hexchat.EAT_ALL
     return hexchat.EAT_ALL
 
 def nwo_dankyamyams(word, word_eol, userdata):

@@ -9,22 +9,22 @@ __module_description__ = 'Announces current song playing in Last.FM'
 def setUSER(word, word_eol, userdata):
     hexchat.set_pluginpref('user', word[1])
     print('Username set to "%s"' % word[1])
-    return hexchat.EAT_NONE
+    return hexchat.EAT_ALL
     
 def setKEY(word, word_eol, userdata):
     hexchat.set_pluginpref('apikey', word[1])
     print('API key set to "%s"' % word[1])
-    return hexchat.EAT_NONE
+    return hexchat.EAT_ALL
     
 def resetUSER(word, word_eol, userdata):
     print('Username reset (old username=%s)' % hexchat.get_pluginpref('user'))
     hexchat.del_pluginpref('user')
-    return hexchat.EAT_NONE
+    return hexchat.EAT_ALL
     
 def resetKEY(word, word_eol, userdata):
     print('API key reset (old API key=%s)' % hexchat.get_pluginpref('apikey'))
     hexchat.del_pluginpref('apikey')
-    return hexchat.EAT_NONE
+    return hexchat.EAT_ALL
 
 def np(word, word_eol, userdata):
     USER = hexchat.get_pluginpref('user')
@@ -40,12 +40,12 @@ def np(word, word_eol, userdata):
             hexchat.command('me \00306now playing \00311%s \00306by \00313%s \00306from \00309%s' % (songName, songArtist, songAlbum))
         except:
             print('No song playing')
-        return hexchat.EAT_NONE
+        return hexchat.EAT_ALL
     if not USER:
         print('Use /setuser <last.fm username> to set a username for the plugin to fetch song data from')
     if not APIKEY:
         print('Use /setapikey <last.fm API key> to set a API key for the plugin to fetch song data from')
-    return hexchat.EAT_NONE
+    return hexchat.EAT_ALL
 
 hexchat.hook_command('setuser', setUSER, help='/setuser <last.fm username> sets the username the plugin uses to fetch your song information')
 hexchat.hook_command('setapikey', setKEY, help='/setapikey <last.fm API key> sets the API key the plugin uses to fetch your song information')
