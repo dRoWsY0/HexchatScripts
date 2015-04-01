@@ -49,9 +49,9 @@ def nwo_kick(word, word_eol, userdata):
 
 def nwo_judo(word, word_eol, userdata):
     if len(word) == 3:
-        hexchat.command('RAW USERHOST %s' % word[1])
-        hexchat.hook_server('302', nwo_mode, userdata = word[2])
-    return hexchat.EAT_ALL
+        hexchat.command('RAW USERHOST %s' % word[2])
+        hexchat.hook_server('302', nwo_mode, userdata = word[1])
+    return hexchat.EAT_PLUGIN
 
 def nwo_mode(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
@@ -61,7 +61,7 @@ def nwo_mode(word, word_eol, userdata):
         hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
         hexchat.command('timer 1 RAW MODE %s %s-o *!*@%s %s' % (chan, userdata, host, nick))
         return hexchat.EAT_ALL
-    return hexchat.EAT_ALL
+    return hexchat.EAT_PLUGIN
 
 def nwo_dankyamyams(word, word_eol, userdata):
     if len(word) > 0:
@@ -71,7 +71,7 @@ def nwo_dankyamyams(word, word_eol, userdata):
 hexchat.hook_command('op', nwo_op, help='/op will op you if +o flags are set on you. /op <nickname> [<nickname>] will op others')
 hexchat.hook_command('deop', nwo_deop, help='/deop will deop you if +o flags are set for you. /deop <nickname> [<nickname>] will deop others')
 hexchat.hook_command('kick', nwo_kick, help='/kick <nickname> will temporarily op you, kickban <nickname> and deop you')
-hexchat.hook_command('judo', nwo_judo, help='/judo <nickname> <mode> will set different flags on a user in your current channel')
+hexchat.hook_command('judo', nwo_judo, help='/judo <mode> <nickname> will set different flags on a user in your current channel')
 hexchat.hook_command('>', nwo_dankyamyams)
 
 def nwo_unloaded(userdata):
