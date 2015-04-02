@@ -37,7 +37,9 @@ def np(word, word_eol, userdata):
             songArtist = data['recenttracks']['track'][0]['artist']['#text']
             songName = data['recenttracks']['track'][0]['name']
             songAlbum = data['recenttracks']['track'][0]['album']['#text']
-            hexchat.command('me \00306now playing \00311%s \00306by \00313%s \00306from \00309%s' % (songName, songArtist, songAlbum))
+            if songAlbum:
+                 songAlbum = ('\00306from \00309%s' % songAlbum)
+            hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
         except:
             print('No song playing')
         return hexchat.EAT_ALL
