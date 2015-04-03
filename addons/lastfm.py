@@ -7,28 +7,28 @@ __module_version__ = '2.0'
 __module_description__ = 'Announces current song playing in Last.FM'
 
 def setUSER(word, word_eol, userdata):
-    hexchat.set_pluginpref('user', word[1])
+    hexchat.set_pluginpref('lfmnwo_user', word[1])
     print('Username set to "%s"' % word[1])
     return hexchat.EAT_ALL
     
 def setKEY(word, word_eol, userdata):
-    hexchat.set_pluginpref('apikey', word[1])
+    hexchat.set_pluginpref('lfmnwo_apikey', word[1])
     print('API key set to "%s"' % word[1])
     return hexchat.EAT_ALL
     
 def resetUSER(word, word_eol, userdata):
-    print('Username reset (old username=%s)' % hexchat.get_pluginpref('user'))
-    hexchat.del_pluginpref('user')
+    print('Username reset (old username=%s)' % hexchat.get_pluginpref('lfmnwo_user'))
+    hexchat.del_pluginpref('lfmnwo_user')
     return hexchat.EAT_ALL
     
 def resetKEY(word, word_eol, userdata):
-    print('API key reset (old API key=%s)' % hexchat.get_pluginpref('apikey'))
-    hexchat.del_pluginpref('apikey')
+    print('API key reset (old API key=%s)' % hexchat.get_pluginpref('lfmnwo_apikey'))
+    hexchat.del_pluginpref('lfmnwo_apikey')
     return hexchat.EAT_ALL
 
 def np(word, word_eol, userdata):
-    USER = hexchat.get_pluginpref('user')
-    APIKEY = hexchat.get_pluginpref('apikey')
+    USER = hexchat.get_pluginpref('lfmnwo_user')
+    APIKEY = hexchat.get_pluginpref('lfmnwo_apikey')
     if USER and APIKEY:
         r=requests.get(r'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&format=json' % (USER, APIKEY))
         data = r.json()
