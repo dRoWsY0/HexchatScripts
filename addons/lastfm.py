@@ -30,18 +30,21 @@ def np(word, word_eol, userdata):
     USER = hexchat.get_pluginpref('lfmnwo_user')
     APIKEY = hexchat.get_pluginpref('lfmnwo_apikey')
     if USER and APIKEY:
-        r=requests.get(r'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&format=json' % (USER, APIKEY))
-        data = r.json()
         try:
-            nowplaying = data['recenttracks']['track'][0]['@attr']['nowplaying']
-            songArtist = data['recenttracks']['track'][0]['artist']['#text']
-            songName = data['recenttracks']['track'][0]['name']
-            songAlbum = data['recenttracks']['track'][0]['album']['#text']
-            if songAlbum:
-                 songAlbum = ('\00306from \00309%s' % songAlbum)
-            hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
+            r=requests.get(r'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&format=json' % (USER, APIKEY))
+            data = r.json()
+            try:
+                nowplaying = data['recenttracks']['track'][0]['@attr']['nowplaying']
+                songArtist = data['recenttracks']['track'][0]['artist']['#text']
+                songName = data['recenttracks']['track'][0]['name']
+                songAlbum = data['recenttracks']['track'][0]['album']['#text']
+                if songAlbum:
+                     songAlbum = ('\00306from \00309%s' % songAlbum)
+                hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
+            except:
+                print('No song playing')
         except:
-            print('No song playing')
+            print('Error: Cannot connect to Last.fm')
         return hexchat.EAT_ALL
     if not USER:
         print('Use /setuser <last.fm username> to set a username for the plugin to fetch song data from')
