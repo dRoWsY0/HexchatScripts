@@ -60,9 +60,9 @@ def nwo_mode(word, word_eol, userdata):
         host = word[3].split('@')[1]
         hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
         if userdata[0] == '+':
-            hexchat.command('timer 1 RAW MODE %s %s *!*@%s' % (chan, userdata, host))
+            hexchat.command('timer 1 RAW MODE %s +%s *!*@%s' % (chan, userdata[1], host))
         elif userdata[0] == '-':
-            hexchat.command('timer 1 RAW MODE %s %s *!*@%s' % (chan, userdata, host))
+            hexchat.command('timer 1 RAW MODE %s -%s *!*@%s' % (chan, userdata[1], host))
         hexchat.command('timer 2 RAW MODE %s -o *%s' % (chan, nick))
     return hexchat.EAT_ALL
 

@@ -29,9 +29,9 @@ def mxtm(word, word_eol, userdata):
     global limit
     if limit == 0 and word[1] == '!mxtm' and status == 'yes':
         context = hexchat.get_info('channel')
-        if context == '##mxtmfanclub' or context == '#Chat' or context == '##dogecoin-bots':
+        if context == '##mxtmfanclub' or context == '#Chat' or context == '#dogecoin-bots':
             link = r.get_random_submission(subreddit='mxtmphotoshopbattles')
-            hexchat.command('say %s – %s' % (link, link.url))
+            hexchat.command('say %s – %s' % (str(link).split(' :: ')[1], link.url))
             limit = 1
             hexchat.hook_timer(2000, timereset)
         

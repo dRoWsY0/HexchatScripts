@@ -52,10 +52,10 @@ def np(word, word_eol, userdata):
         print('Use /setapikey <last.fm API key> to set a API key for the plugin to fetch song data from')
     return hexchat.EAT_ALL
 
-hexchat.hook_command('setuser', setUSER, help='/setuser <last.fm username> sets the username the plugin uses to fetch your song information')
-hexchat.hook_command('setapikey', setKEY, help='/setapikey <last.fm API key> sets the API key the plugin uses to fetch your song information')
-hexchat.hook_command('resetuser', resetUSER, help='/resetuser resets the username the plugin uses to fetch your song information')
-hexchat.hook_command('resetapikey', resetKEY, help='/resetapikey resets the API key the plugin uses to fetch your song information')
+hexchat.hook_command('lfmsetuser', setUSER, help='/setuser <last.fm username> sets the username the plugin uses to fetch your song information')
+hexchat.hook_command('lfmsetapikey', setKEY, help='/setapikey <last.fm API key> sets the API key the plugin uses to fetch your song information')
+hexchat.hook_command('lfmresetuser', resetUSER, help='/resetuser resets the username the plugin uses to fetch your song information')
+hexchat.hook_command('lfmresetapikey', resetKEY, help='/resetapikey resets the API key the plugin uses to fetch your song information')
 hexchat.hook_command('np', np)
 
 def lfm_unloaded(userdata):
