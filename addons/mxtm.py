@@ -1,4 +1,5 @@
 import hexchat
+import time
 import praw
 
 __module_name__ = 'mxtm'
@@ -9,20 +10,14 @@ __module_description__ = 'Links random mxtm photoshop'
 r = praw.Reddit(user_agent='HexchatMXTMPhotoshopsGrabber')
 limit = 0
 
-def enablemxtm(word, word_eol, userdata):
-    hexchat.set_pluginpref('mxtm', 'yes')
-    print('mxtm enabled')
+def mxtmPrefs(word, word_eol, userdata):
+    if word[1] == 'enable':
+        hexchat.set_pluginpref('mxtm', 'yes')
+        print('mxtm enabled')
+    elif word[1] == 'disable':
+        hexchat.del_pluginpref('mxtm')
+        print('mxtm disabled >:')
     return hexchat.EAT_ALL
-    
-def disablemxtm(word, word_eol, userdata):
-    hexchat.del_pluginpref('mxtm')
-    print('mxtm disabled >:')
-    return hexchat.EAT_ALL
-
-def timereset(userdata):
-    global limit
-    limit = 0
-    return 0
 
 def mxtm(word, word_eol, userdata):
     status = hexchat.get_pluginpref('mxtm')
@@ -32,13 +27,15 @@ def mxtm(word, word_eol, userdata):
         if context == '##mxtmfanclub' or context == '#Chat' or context == '#dogecoin-bots':
             link = r.get_random_submission(subreddit='mxtmphotoshopbattles')
             hexchat.command('say %s – %s' % (str(link).split(' :: ')[1], link.url))
+            lastTime = time.time()
             limit = 1
-            hexchat.hook_timer(2000, timereset)
-        
-    return hexchat.EAT_NONE
+            while limit == 1:
+                if time.time() - lastTime >= 2:
+                    limit = 0
+                    break
+    return hexchat.EAT_plugin
 
-hexchat.hook_command('enablemxtm', enablemxtm, help='/enablemxtm turns mxtm on')
-hexchat.hook_command('disablemxtm', disablemxtm, help='/disablemxtm turns mxtm off')
+hexchat.hook_command('mxtm', mxtmPrefs, help='/mxtm enable turns mxtm on. /mxtm disable turns mxtm off.')
 hexchat.hook_print('Channel Message', mxtm)
 
 def mxtm_unloaded(userdata):
