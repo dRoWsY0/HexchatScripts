@@ -35,7 +35,7 @@ def nwo_kick(word, word_eol, userdata):
     nick = hexchat.get_info('nick')
     if len(word) >= 2:
         for user in users:
-            if hexchat.nickcmp(user.nick, word[1]) == 0 :
+            if hexchat.nickcmp(user.nick, word[1]) == 0:
                 host = user.host.split('@')[1]
                 hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
                 hexchat.command('timer 1 RAW MODE %s -e+b *!*@%s *!*@%s' % (chan, host, host))
@@ -48,22 +48,14 @@ def nwo_kick(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def nwo_judo(word, word_eol, userdata):
-    if len(word) == 3:
-        hexchat.command('RAW USERHOST %s' % word[2])
-        hexchat.hook_server('302', nwo_mode, userdata = word[1])
-    return hexchat.EAT_PLUGIN
-
-def nwo_mode(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     nick = hexchat.get_info('nick')
-    if userdata:
-        host = word[3].split('@')[1]
+    try:
         hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
-        if userdata[0] == '+':
-            hexchat.command('timer 1 RAW MODE %s +%s *!*@%s' % (chan, userdata[1], host))
-        elif userdata[0] == '-':
-            hexchat.command('timer 1 RAW MODE %s -%s *!*@%s' % (chan, userdata[1], host))
+        hexchat.command('RAW timer 1 %s' % word_eol[1])
         hexchat.command('timer 2 RAW MODE %s -o *%s' % (chan, nick))
+    except:
+        print('Failed')
     return hexchat.EAT_ALL
 
 def nwo_dankyamyams(word, word_eol, userdata):
@@ -74,7 +66,7 @@ def nwo_dankyamyams(word, word_eol, userdata):
 hexchat.hook_command('op', nwo_op, help='/op will op you if +o flags are set on you. /op <nickname> [<nickname>] will op others')
 hexchat.hook_command('deop', nwo_deop, help='/deop will deop you if +o flags are set for you. /deop <nickname> [<nickname>] will deop others')
 hexchat.hook_command('kick', nwo_kick, help='/kick <nickname> will temporarily op you, kickban <nickname> and deop you')
-hexchat.hook_command('judo', nwo_judo, help='/judo <mode> <nickname> will set different flags on a user in your current channel')
+hexchat.hook_command('judo', nwo_judo, help='/judo <op command> temporarily gives you operator status to execute a command.')
 hexchat.hook_command('>', nwo_dankyamyams)
 
 def nwo_unloaded(userdata):
