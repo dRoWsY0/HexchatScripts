@@ -33,7 +33,7 @@ def mxtm(word, word_eol, userdata):
                 if time.time() - lastTime >= 2:
                     limit = 0
                     break
-    return hexchat.EAT_plugin
+    return hexchat.EAT_PLUGIN
 
 hexchat.hook_command('mxtm', mxtmPrefs, help='/mxtm enable turns mxtm on. /mxtm disable turns mxtm off.')
 hexchat.hook_print('Channel Message', mxtm)
