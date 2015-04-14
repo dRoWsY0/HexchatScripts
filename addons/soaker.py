@@ -57,22 +57,27 @@ def soakerActivityCheck(actionNick):
     return activeList
             
 def soakerMessageHandler(word, word_eol, userdata):
+    soakbotNick = hexchat.get_info('nick')
     status = hexchat.get_pluginpref('soakbot')
     if status == 'yes':
-        if word[0] == 'Doger':
-            if word[1].split(' ')[0] == 'Such' and word[1].split(' ')[6] == soakbotNick + '!':
-                initUser = word[1].split(' ')[1]
-                soakAmount = int(word[1].split(' ')[4][1:])
+        if word[1].lower() == '!active':
+            hexchat.command('say I spy with my little NSA, %s meltable shibe beams. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0])))
+        #elif word[0] == 'Doger':
+        else:
+            #if word[1].split(' ')[0] == 'Such' and word[1].split(' ')[6] == soakbotNick + '!':
+            if word[1].split(' ')[0] == '!tip' and word[1].split(' ')[1] == soakbotNick:
+                #initUser = word[1].split(' ')[1]
+                initUser = word[0]
+                #soakAmount = int(word[1].split(' ')[4][1:])
+                soakAmount = int(word[1].split(' ')[2])
                 listActive = soakerActivityCheck(initUser)
                 averageTip = soakAmount//len(listActive)
-                if temperature < 10:
-                    hexchat.command('say Sorry %s, not enough to go around. Returning soak' % initUser)
-                    hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
+                if averageTip < 10:
+                    hexchat.command('say Sorry %s, jet fuel can\'t melt steel beams. Returning soak.' % initUser)
+                    #hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
                 else:
-                    hexchat.command('say %s is soaking %s shibes with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
-                    hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
-        elif word[1].lower() == '!active':
-            hexchat.command('say I see %s soakable shibes. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0])))
+                    hexchat.command('say %s is melting %s shibe beams with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
+                    #hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
     return hexchat.EAT_PLUGIN
 
 hexchat.hook_command('enablesoak', enablesoak, help='/enablesoak turns soak on')
@@ -80,7 +85,7 @@ hexchat.hook_command('disablesoak', disablesoak, help='/disablesoak turns soak o
 hexchat.hook_command('soakerignoreadd', soakerlistadd, help='/soakerlistadd adds users to ignore list')
 hexchat.hook_command('soakerignorelist', soakerlistlist, help='/soakerlistignore lists users on the ignore list')
 hexchat.hook_command('soakerignoreremove', soakerlistremove, help='/soakerlistremove removes users from the ignore list')
-hexchat.hook_command('soakerignoreclear', soakerlistclear, help='/soakerignoreclear removes users from the ignore list')
+hexchat.hook_command('soakerignoreclear', soakerlistclear, help='/soakerignoreclear clears the ignore list')
 
 hexchat.hook_print('Channel Message', soakerMessageHandler)
 hexchat.hook_print('Channel Msg Hilight', soakerMessageHandler)
