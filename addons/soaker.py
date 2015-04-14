@@ -8,23 +8,27 @@ __module_description__ = 'Soakbot'
 
 def enablesoak(word, word_eol, userdata):
     hexchat.set_pluginpref('soakbot', 'yes')
-    print('soak enabled')
+    print('Soaker enabled')
     return hexchat.EAT_ALL
     
 def disablesoak(word, word_eol, userdata):
     hexchat.set_pluginpref('soakbot', 'no')
-    print('soak disabled >:')
+    print('Soaker disabled >:')
     return hexchat.EAT_ALL
 
 def soakerlistadd(word, word_eol, userdata):
     ignoreList = hexchat.get_pluginpref('soakbotignorelist')
-    hexchat.set_pluginpref('soakbotignorelist', '%s %s' % (ignoreList, word_eol[1].lower()))
-    return hexchat.EAT_PLUGIN
+    if ignoreList != 'None':
+        hexchat.set_pluginpref('soakbotignorelist', '%s %s' % (ignoreList, word_eol[1].lower()))
+    else:
+        hexchat.set_pluginpref('soakbotignorelist', '%s' % word_eol[1].lower())
+    print('%s added to the ignore list' % ', '.join(word_eol[1].split(' ')))
+    return hexchat.EAT_ALL
 
 def soakerlistlist(word, word_eol, userdata):
     ignoreList = hexchat.get_pluginpref('soakbotignorelist')
     print(ignoreList)
-    return hexchat.EAT_PLUGIN
+    return hexchat.EAT_ALL
     
 def soakerlistremove(word, word_eol, userdata):
     ignoreList = hexchat.get_pluginpref('soakbotignorelist').split(' ')
@@ -32,14 +36,19 @@ def soakerlistremove(word, word_eol, userdata):
         for removal in word:
             if removal != word[1] and ignoreList.count(removal) >= 1:
                 ignoreList.remove(removal)
-    return hexchat.EAT_PLUGIN
+    return hexchat.EAT_ALL
+
+def soakerlistclear(word, word_eol, userdata):
+    hexchat.del_pluginpref('soakbotignorelist')
+    print('Ignore list cleared')
+    return hexchat.EAT_ALL
     
 def soakerActivityCheck(actionNick):
     activeList = []
     ignoreList = hexchat.get_pluginpref('soakbotignorelist').split(' ')
     for active in hexchat.get_list('users'):
         appendList = False
-        if time.time() - active.lasttalk <= 600 and hexchat.nickcmp(active.nick, hexchat.get_info('nick')) != 0 and hexchat.nickcmp(active.nick, actionNick)) != 0:
+        if time.time() - active.lasttalk <= 600 and hexchat.nickcmp(active.nick, hexchat.get_info('nick')) != 0 and hexchat.nickcmp(active.nick, actionNick) != 0:
             for ignored in ignoreList:
                 if hexchat.nickcmp(active.nick, ignored) == 0:
                     appendList = True
@@ -50,8 +59,6 @@ def soakerActivityCheck(actionNick):
 def soakerMessageHandler(word, word_eol, userdata):
     status = hexchat.get_pluginpref('soakbot')
     if status == 'yes':
-        soakbotNick = hexchat.get_info('nick')
-        targetChannel = hexchat.get_info('channel')
         if word[0] == 'Doger':
             if word[1].split(' ')[0] == 'Such' and word[1].split(' ')[6] == soakbotNick + '!':
                 initUser = word[1].split(' ')[1]
@@ -65,14 +72,15 @@ def soakerMessageHandler(word, word_eol, userdata):
                     hexchat.command('say %s is soaking %s shibes with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
                     hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
         elif word[1].lower() == '!active':
-            hexchat.command('say I see %s soakable shibes. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0]))
+            hexchat.command('say I see %s soakable shibes. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0])))
     return hexchat.EAT_PLUGIN
 
 hexchat.hook_command('enablesoak', enablesoak, help='/enablesoak turns soak on')
 hexchat.hook_command('disablesoak', disablesoak, help='/disablesoak turns soak off')
 hexchat.hook_command('soakerignoreadd', soakerlistadd, help='/soakerlistadd adds users to ignore list')
-hexchat.hook_command('soakerignorelist', soakerlistignore, help='/soakerignorelist lists users on the ignore list')
-hexchat.hook_command('soakerignoreremove', soakerremoveignore, help='/soakerignoreremove removes users from the ignore list')
+hexchat.hook_command('soakerignorelist', soakerlistlist, help='/soakerlistignore lists users on the ignore list')
+hexchat.hook_command('soakerignoreremove', soakerlistremove, help='/soakerlistremove removes users from the ignore list')
+hexchat.hook_command('soakerignoreclear', soakerlistclear, help='/soakerignoreclear removes users from the ignore list')
 
 hexchat.hook_print('Channel Message', soakerMessageHandler)
 hexchat.hook_print('Channel Msg Hilight', soakerMessageHandler)
