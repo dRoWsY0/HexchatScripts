@@ -6,6 +6,8 @@ __module_author__ = 'NewellWorldOrder'
 __module_version__ = '1.0'
 __module_description__ = 'Soakbot'
 
+hexchat.set_pluginpref('soakbot', 'no')
+
 def enablesoak(word, word_eol, userdata):
     hexchat.set_pluginpref('soakbot', 'yes')
     print('Soaker enabled')
@@ -47,12 +49,12 @@ def soakerActivityCheck(actionNick):
     activeList = []
     ignoreList = hexchat.get_pluginpref('soakbotignorelist').split(' ')
     for active in hexchat.get_list('users'):
-        appendList = False
-        if time.time() - active.lasttalk <= 600 and hexchat.nickcmp(active.nick, hexchat.get_info('nick')) != 0 and hexchat.nickcmp(active.nick, actionNick) != 0:
+        appendList = True
+        if time.time() - active.lasttalk <= 600 and hexchat.nickcmp(active.nick, hexchat.get_info('nick')) != 0 and hexchat.nickcmp(active.nick.lower(), actionNick.lower()) != 0:
             for ignored in ignoreList:
                 if hexchat.nickcmp(active.nick, ignored) == 0:
-                    appendList = True
-            if appendList == False:
+                    appendList = False
+            if appendList == True:
                 activeList.append(active.nick)
     return activeList
             
@@ -62,22 +64,18 @@ def soakerMessageHandler(word, word_eol, userdata):
     if status == 'yes':
         if word[1].lower() == '!active':
             hexchat.command('say I spy with my little NSA, %s meltable shibe beams. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0])))
-        #elif word[0] == 'Doger':
-        else:
-            #if word[1].split(' ')[0] == 'Such' and word[1].split(' ')[6] == soakbotNick + '!':
-            if word[1].split(' ')[0] == '!tip' and word[1].split(' ')[1] == soakbotNick:
-                #initUser = word[1].split(' ')[1]
-                initUser = word[0]
-                #soakAmount = int(word[1].split(' ')[4][1:])
-                soakAmount = int(word[1].split(' ')[2])
+        elif word[0] == 'Doger':
+            if word[1].split(' ')[0] == 'Such' and word[1].split(' ')[6] == soakbotNick + '!':
+                initUser = word[1].split(' ')[1]
+                soakAmount = int(word[1].split(' ')[4][1:])
                 listActive = soakerActivityCheck(initUser)
                 averageTip = soakAmount//len(listActive)
                 if averageTip < 10:
                     hexchat.command('say Sorry %s, jet fuel can\'t melt steel beams. Returning soak.' % initUser)
-                    #hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
+                    hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
                 else:
                     hexchat.command('say %s is melting %s shibe beams with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
-                    #hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
+                    hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
     return hexchat.EAT_PLUGIN
 
 hexchat.hook_command('enablesoak', enablesoak, help='/enablesoak turns soak on')

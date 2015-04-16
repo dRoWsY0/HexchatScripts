@@ -43,17 +43,16 @@ def nwo_kick(word, word_eol, userdata):
                     hexchat.command('timer 1 RAW KICK %s %s %s' % (chan, word[1], word_eol[2]))
                 else:
                     hexchat.command('timer 1 RAW KICK %s %s' % (chan, word[1]))
-                hexchat.command('timer 2 RAW MODE %s -o *%s' % (chan, nick))
+                hexchat.command('timer 2 RAW MODE %s -o %s' % (chan, nick))
                 break
     return hexchat.EAT_ALL
 
 def nwo_judo(word, word_eol, userdata):
     chan = hexchat.get_info('channel')
     nick = hexchat.get_info('nick')
-    command = word_eol[1]
     try:
         hexchat.command('RAW PRIVMSG ChanServ :op %s' % chan)
-        hexchat.command('timer 1 RAW %s' % command)
+        hexchat.command('timer 1 RAW %s' % word_eol[1])
         hexchat.command('timer 2 RAW MODE %s -o *%s' % (chan, nick))
     except:
         print('Failed')
