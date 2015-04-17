@@ -18,11 +18,13 @@ def timereset(userdata):
     return 0
 
 def unban(word, word_eol, userdata):
-    nick = hexchat.get_info('nick')
-    hexchat.command('RAW PRIVMSG ChanServ :UNBAN %s %s' % (userdata, nick))
-    hexchat.command('timer 1 RAW JOIN %s' % userdata)
-    limit = 1
-    hexchat.hook_timer(2000, timereset)
+    global limit
+    if limit == 0:
+        nick = hexchat.get_info('nick')
+        hexchat.command('RAW PRIVMSG ChanServ :UNBAN %s %s' % (userdata, nick))
+        hexchat.command('timer 1 RAW JOIN %s' % userdata)
+        limit = 1
+        hexchat.hook_timer(2000, timereset)
     return hexchat.EAT_PLUGIN
 
 hexchat.hook_print('You Kicked', rejoin)
