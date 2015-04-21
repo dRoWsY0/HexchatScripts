@@ -1,5 +1,6 @@
 import time
 import hexchat
+import re
 
 __module_name__ = 'NWOSoak'
 __module_author__ = 'NewellWorldOrder'
@@ -7,6 +8,9 @@ __module_version__ = '1.0'
 __module_description__ = 'Soakbot'
 
 hexchat.set_pluginpref('soakbot', 'no')
+soakAllList = []
+noSoakList = []
+activeTimer = 10
 
 def enablesoak(word, word_eol, userdata):
     hexchat.set_pluginpref('soakbot', 'yes')
@@ -46,37 +50,77 @@ def soakerlistclear(word, word_eol, userdata):
     return hexchat.EAT_ALL
     
 def soakerActivityCheck(actionNick):
+    global soakAllList
+    global noSoakList
+    global activeTimer
+    soakAll = False
+    if actionNick in soakAllList:
+        soakAll = True
     activeList = []
+    ignoreListNickserv = []
     ignoreList = hexchat.get_pluginpref('soakbotignorelist').split(' ')
+    ignoreList.extend([actionNick.lower(), hexchat.get_info('nick').lower()])
+    ignoreList.extend(noSoakList)
     for active in hexchat.get_list('users'):
-        appendList = True
-        if time.time() - active.lasttalk <= 600 and hexchat.nickcmp(active.nick, hexchat.get_info('nick')) != 0 and hexchat.nickcmp(active.nick.lower(), actionNick.lower()) != 0:
-            for ignored in ignoreList:
-                if hexchat.nickcmp(active.nick, ignored) == 0:
-                    appendList = False
-            if appendList == True:
+        if active.nick.lower() == actionNick:
+            ignoreListNickserv.append(active.account)
+    for active in hexchat.get_list('users'):
+        if time.time() - active.lasttalk <= (60 * activeTimer) or soakAll:
+            if active.host.split('@')[1] != 'services.' and active.nick.lower() not in ignoreList and active.account not in ignoreListNickserv:
                 activeList.append(active.nick)
+                ignoreListNickserv.append(active.account)
+    noSoakList = []
+    activeTimer = 10
     return activeList
             
 def soakerMessageHandler(word, word_eol, userdata):
+    global soakAllList
+    global noSoakList
+    global activeTimer
     soakbotNick = hexchat.get_info('nick')
     status = hexchat.get_pluginpref('soakbot')
+    message = word[1].lower().split(' ')
     if status == 'yes':
-        if word[1].lower() == '!active':
+        if message[0] == '!active':
             hexchat.command('say I spy with my little NSA, %s meltable shibe beams. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0])))
+        elif len(message) >= 4 and message[0] + ' ' + message[1] == '!tip ' + soakbotNick.lower():
+            subUser = re.compile('-.*')
+            newTime = re.compile('--timer=\d*')
+            if 'all' in message[3:]:
+                soakAllList.append(word[0].lower())
+            for words in message[3:]:
+                m = re.match(newTime, words)
+            if m.string:
+                activeTimer = int(m.string.split('=')[1])
+            noSoakList = [match[1:] for match in message[3:] if re.match(subUser, match)]
         elif word[0] == 'Doger':
-            if word[1].split(' ')[0] == 'Such' and word[1].split(' ')[6] == soakbotNick + '!':
+            if message[0] == 'such' and message[6] == soakbotNick.lower() + '!':
                 initUser = word[1].split(' ')[1]
-                soakAmount = int(word[1].split(' ')[4][1:])
-                listActive = soakerActivityCheck(initUser)
-                averageTip = soakAmount//len(listActive)
-                if averageTip < 10:
-                    hexchat.command('say Sorry %s, jet fuel can\'t melt steel beams. Returning soak.' % initUser)
-                    hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
-                else:
-                    hexchat.command('say %s is melting %s shibe beams with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
-                    hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
-    return hexchat.EAT_PLUGIN
+                soakAmount = int(message[4][1:])
+                listActive = soakerActivityCheck(initUser.lower())
+                if len(listActive) >= 1:
+                    averageTip = soakAmount//len(listActive)
+                    if averageTip < 10:
+                        hexchat.command('say Sorry %s, jet fuel can\'t melt steel beams. Returning soak.' % initUser)
+                        #hexchat.command('say %s YOU\'LL GO BLIND! Returning soak.' % initUser)
+                        hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
+                    else:
+                        hexchat.command('say %s is melting %s shibe beams with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
+                        #hexchat.command('say %s is bukkaking %s horny shibes with %sL of cum: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
+                        hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
+                try:
+                    soakAllList.remove(initUser)
+                    
+                except:
+                    print('')
+        return hexchat.EAT_ALL
+    return hexchat.EAT_NONE
+
+def ignoreDoger(word, word_eol, userdata):
+    status = hexchat.get_pluginpref('soakbot')
+    if status == 'yes':
+        return hexchat.EAT_ALL
+    return hexchat.EAT_NONE
 
 hexchat.hook_command('enablesoak', enablesoak, help='/enablesoak turns soak on')
 hexchat.hook_command('disablesoak', disablesoak, help='/disablesoak turns soak off')
@@ -85,11 +129,16 @@ hexchat.hook_command('soakerignorelist', soakerlistlist, help='/soakerlistignore
 hexchat.hook_command('soakerignoreremove', soakerlistremove, help='/soakerlistremove removes users from the ignore list')
 hexchat.hook_command('soakerignoreclear', soakerlistclear, help='/soakerignoreclear clears the ignore list')
 
+hexchat.hook_print('Private Message', ignoreDoger)
+hexchat.hook_print('Private Message to Dialog', ignoreDoger)
 hexchat.hook_print('Channel Message', soakerMessageHandler)
 hexchat.hook_print('Channel Msg Hilight', soakerMessageHandler)
 
+hexchat.set_pluginpref('soakbot', 'no')
+
 def nwo_unloaded(userdata):
-    hexchat.set_pluginpref('soakbot', 'no')
+    hexchat.set_pluginpref('soakbot', 'yes')
+    print('Soaker enabled')
     hexchat.emit_print('Notice', '', '%s v%s by %s unloaded' % (__module_name__, __module_version__, __module_author__))
     return hexchat.EAT_ALL
 hexchat.emit_print('Notice', '', '%s v%s by %s loaded' % (__module_name__, __module_version__, __module_author__))

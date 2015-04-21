@@ -23,20 +23,20 @@ def mxtm(word, word_eol, userdata):
     status = hexchat.get_pluginpref('mxtm')
     global limit
     if limit == 0 and word[1] == '!mxtm' and status == 'yes':
-        context = hexchat.get_info('channel')
-        if context == '##mxtmfanclub' or context == '#Chat' or context == '#dogecoin-bots':
-            link = r.get_random_submission(subreddit='mxtmphotoshopbattles')
-            hexchat.command('say %s – %s' % (str(link).split(' :: ')[1], link.url))
-            lastTime = time.time()
-            limit = 1
-            while limit == 1:
-                if time.time() - lastTime >= 2:
-                    limit = 0
-                    break
+        link = r.get_random_submission(subreddit='mxtmphotoshopbattles')
+        hexchat.command('say %s – %s' % (str(link).split(' :: ')[1], link.url))
+        lastTime = time.time()
+        limit = 1
     return hexchat.EAT_PLUGIN
+
+def resetmxtm(userdata):
+    global limit
+    limit = 0
+    return 1
 
 hexchat.hook_command('mxtm', mxtmPrefs, help='/mxtm enable turns mxtm on. /mxtm disable turns mxtm off.')
 hexchat.hook_print('Channel Message', mxtm)
+hexchat.hook_timer(2000, resetmxtm)
 
 def mxtm_unloaded(userdata):
     hexchat.emit_print('Notice', '', '%s v%s by %s unloaded' % (__module_name__, __module_version__, __module_author__))
