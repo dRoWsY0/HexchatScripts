@@ -52,9 +52,9 @@ def np(word, word_eol, userdata):
         except:
             print('Error: Cannot connect to Last.fm')
     if not USER:
-        print('Use /lastfmuser <last.fm username> to set a username for the plugin to fetch song data from')
+        print('Use /lastfmuser set <last.fm username> to set a username for the plugin to fetch song data from')
     if not APIKEY:
-        print('Use /lastfmapi <last.fm API key> to set a API key for the plugin to fetch song data from')
+        print('Use /lastfmapi set <last.fm API key> to set a API key for the plugin to fetch song data from')
     return hexchat.EAT_ALL
 
 hexchat.hook_command('lastfm', lfmHelp, help='/np sends your currently playing song according to last.fm. Use /help lastfmuser and /help lastfmapi for configuration information.')
