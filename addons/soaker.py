@@ -8,7 +8,7 @@ __module_version__ = '1.0'
 __module_description__ = 'Soakbot'
 
 hexchat.set_pluginpref('soakbot', 'no')
-soakAllList = []
+soakAll = False
 noSoakList = []
 activeTimer = 10
 
@@ -50,12 +50,9 @@ def soakerlistclear(word, word_eol, userdata):
     return hexchat.EAT_ALL
     
 def soakerActivityCheck(actionNick):
-    global soakAllList
+    global soakAll
     global noSoakList
     global activeTimer
-    soakAll = False
-    if actionNick in soakAllList:
-        soakAll = True
     activeList = []
     ignoreListNickserv = []
     ignoreList = hexchat.get_pluginpref('soakbotignorelist').split(' ')
@@ -69,12 +66,10 @@ def soakerActivityCheck(actionNick):
             if active.host.split('@')[1] != 'services.' and active.nick.lower() not in ignoreList and active.account not in ignoreListNickserv:
                 activeList.append(active.nick)
                 ignoreListNickserv.append(active.account)
-    noSoakList = []
-    activeTimer = 10
     return activeList
             
 def soakerMessageHandler(word, word_eol, userdata):
-    global soakAllList
+    global soakAll
     global noSoakList
     global activeTimer
     soakbotNick = hexchat.get_info('nick')
@@ -84,35 +79,36 @@ def soakerMessageHandler(word, word_eol, userdata):
         if message[0] == '!active':
             hexchat.command('say I spy with my little NSA, %s meltable shibe beams. Only users identified with NickServ are included.' % len(soakerActivityCheck(word[0])))
         elif len(message) >= 4 and message[0] + ' ' + message[1] == '!tip ' + soakbotNick.lower():
-            subUser = re.compile('-.*')
-            newTime = re.compile('--timer=\d*')
-            if 'all' in message[3:]:
-                soakAllList.append(word[0].lower())
-            for words in message[3:]:
-                m = re.match(newTime, words)
-            if m.string:
-                activeTimer = int(m.string.split('=')[1])
-            noSoakList = [match[1:] for match in message[3:] if re.match(subUser, match)]
-        elif word[0] == 'Doger':
-            if message[0] == 'such' and message[6] == soakbotNick.lower() + '!':
-                initUser = word[1].split(' ')[1]
-                soakAmount = int(message[4][1:])
-                listActive = soakerActivityCheck(initUser.lower())
-                if len(listActive) >= 1:
-                    averageTip = soakAmount//len(listActive)
-                    if averageTip < 10:
-                        hexchat.command('say Sorry %s, jet fuel can\'t melt steel beams. Returning soak.' % initUser)
-                        #hexchat.command('say %s YOU\'LL GO BLIND! Returning soak.' % initUser)
-                        hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
-                    else:
-                        hexchat.command('say %s is melting %s shibe beams with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
-                        #hexchat.command('say %s is bukkaking %s horny shibes with %sL of cum: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
-                        hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
-                try:
-                    soakAllList.remove(initUser)
-                    
-                except:
-                    print('')
+            for idx, words in enumerate(message, start=3):
+                if words.lower() == 'all':
+                    soakAll = True
+                if words[0:7].lower() == '--timer=':
+                    try:
+                        activeTimer = int(words[7:0])
+                    except:
+                        hexchat.command('say Active timer must be an integer!')
+                if words[0].lower() == '-':
+                    noSoakList.append(words[1:])
+        elif word[0] == 'Doger' and message[0] == 'such' and message[6] == soakbotNick.lower() + '!':
+            initUser = word[1].split(' ')[1]
+            soakAmount = int(message[4][1:])
+            listActive = soakerActivityCheck(initUser.lower())
+            if len(listActive) >= 1:
+                averageTip = soakAmount//len(listActive)
+                if averageTip < 10:
+                    #hexchat.command('say Sorry %s, jet fuel can\'t melt steel beams. Returning soak.' % initUser)
+                    hexchat.command('say %s YOU\'LL GO BLIND! Returning soak.' % initUser)
+                    hexchat.command('msg Doger tip %s %s' % (initUser, soakAmount))
+                else:
+                    #hexchat.command('say %s is melting %s shibe beams with Ɖ%s: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
+                    hexchat.command('say %s is bukkaking %s horny shibes with %smL of cum: %s' % (initUser, len(listActive), averageTip, ', '.join(listActive)))
+                    hexchat.command('msg Doger mtip %s %s' % ((' %s ' % str(averageTip)).join(listActive), averageTip))
+            try:
+                soakAll = False
+                noSoakList = []
+                activeTimer = 10
+            except:
+                print('')
         return hexchat.EAT_ALL
     return hexchat.EAT_NONE
 
