@@ -7,7 +7,7 @@ except:
 
 __module_name__ = 'last.fm'
 __module_author__ = 'NewellWorldOrder'
-__module_version__ = '2.0'
+__module_version__ = '2.1'
 __module_description__ = 'Announces current song playing in Last.FM'
 
 def lfmHelp(word, word_eol, userdata):
@@ -32,7 +32,7 @@ def setKEY(word, word_eol, userdata):
         hexchat.del_pluginpref('lfmnwo_apikey') 
     return hexchat.EAT_ALL
 
-def np(word, word_eol, userdata):
+def lfm(word, word_eol, userdata):
     USER = hexchat.get_pluginpref('lfmnwo_user')
     APIKEY = hexchat.get_pluginpref('lfmnwo_apikey')
     if USER and APIKEY:
@@ -44,9 +44,15 @@ def np(word, word_eol, userdata):
                 songName = data['recenttracks']['track'][0]['name']
                 songArtist = data['recenttracks']['track'][0]['artist']['#text']
                 songAlbum = data['recenttracks']['track'][0]['album']['#text']
-                if songAlbum:
-                     songAlbum = ('\00306from \00309%s' % songAlbum)
-                hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
+                if len(word) < 1:
+                    if songAlbum:
+                         songAlbum = ('\00306from \00309%s' % songAlbum)
+                    hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
+                elif word[1].lower() == 'nocolor':
+                    if songAlbum:
+                         songAlbum = ('from %s' % songAlbum)
+                    hexchat.command('me now playing %s by %s %s' % (songName, songArtist, songAlbum))
+
             except:
                 print('Last.FM: No song playing')
         except:
@@ -60,7 +66,7 @@ def np(word, word_eol, userdata):
 hexchat.hook_command('lastfm', lfmHelp, help='/np sends your currently playing song according to last.fm. Use /help lastfmuser and /help lastfmapi for configuration information.')
 hexchat.hook_command('lastfmuser', setUSER, help='/lastfmuser set <last.fm username> sets the username the plugin uses to fetch your song information. Use /lastfmuser reset to reset it.')
 hexchat.hook_command('lastfmapi', setKEY, help='/lastfmapi set <last.fm API key> sets the API key the plugin uses to fetch your song information. Use /lastfmapi reset to reset it.')
-hexchat.hook_command('np', np, help='/np sends your currently playing song according to last.fm.')
+hexchat.hook_command('np', lfm, help='/np sends your currently playing song according to last.fm.')
 
 def lfm_unloaded(userdata):
     hexchat.emit_print('Notice', '', '%s v%s by %s unloaded' % (__module_name__, __module_version__, __module_author__))
