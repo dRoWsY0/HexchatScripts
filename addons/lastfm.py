@@ -44,7 +44,7 @@ def lfm(word, word_eol, userdata):
                 songName = data['recenttracks']['track'][0]['name']
                 songArtist = data['recenttracks']['track'][0]['artist']['#text']
                 songAlbum = data['recenttracks']['track'][0]['album']['#text']
-                if len(word) < 1:
+                if len(word) < 2:
                     if songAlbum:
                          songAlbum = ('\00306from \00309%s' % songAlbum)
                     hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
