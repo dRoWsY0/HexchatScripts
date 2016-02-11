@@ -3,70 +3,140 @@ import hexchat
 try:
     import requests
 except:
-    print('lastfm.py requres the requests python library. Link: http://docs.python-requests.org/en/latest/')
+    print('LastFM: lastfm.py requres the requests python library. Link: http://docs.python-requests.org/en/latest/')
 
 __module_name__ = 'last.fm'
 __module_author__ = 'NewellWorldOrder'
-__module_version__ = '2.1'
+__module_version__ = '3.0'
 __module_description__ = 'Announces current song playing in Last.FM'
 
-def lfmHelp(word, word_eol, userdata):
-    print('Last.FM by NewellWorldOrder: /np displays the song you are listening to. Use /help lastfmuser and /help lastfmapi for configuration information.')
-    return hexchat.EAT_ALL
+HELPTEXT = '\002/LastFM help\017 for help.'
+KEY = '6e54358934d2d0b1b926e25613384520'
+COMMANDS = ['set','reset','print']
+SETTINGS = ['user','base_color','track_color','artist_color','album_color']
+COLORS = {'white': '00', 'black': '01', 'blue': '02', 'green': '03', 'lightred': '04', 'brown': '05',
+           'purple': '06', 'orange': '07', 'yellow': '08', 'lightgreen': '09', 'cyan': '10', 'lightcyan': '11',
+           'lightblue': '12', 'pink': '13', 'grey': '14', 'lightgrey': '15'}
 
-def setUSER(word, word_eol, userdata):
-    if word[1].lower() == 'set':
-        hexchat.set_pluginpref('lfmnwo_user', word[2])
-        print('Username set to "%s"' % word[2])
-    if word[1].lower() == 'reset':
-        print('Username reset (old username=%s)' % hexchat.get_pluginpref('lfmnwo_user'))
+def cleanOldVer():
+    if hexchat.get_pluginpref('lfmnwo_user'):
+        hexchat.set_pluginpref('lastfm_user', hexchat.get_pluginpref('lfmnwo_user'))
         hexchat.del_pluginpref('lfmnwo_user')
-    return hexchat.EAT_ALL
-    
-def setKEY(word, word_eol, userdata):
-    if word[1].lower() == 'set':
-        hexchat.set_pluginpref('lfmnwo_apikey', word[2])
-        print('API key set to "%s"' % word[2])
-    if word[1].lower() == 'reset':
-        print('API key reset (old API key=%s)' % hexchat.get_pluginpref('lfmnwo_apikey'))
-        hexchat.del_pluginpref('lfmnwo_apikey') 
-    return hexchat.EAT_ALL
+    if hexchat.get_pluginpref('lfmnwo_apikey'):
+        hexchat.del_pluginpref('lfmnwo_apikey')
+    return
 
-def lfm(word, word_eol, userdata):
-    USER = hexchat.get_pluginpref('lfmnwo_user')
-    APIKEY = hexchat.get_pluginpref('lfmnwo_apikey')
-    if USER and APIKEY:
+def defaultColors():
+    if not hexchat.get_pluginpref('lastfm_base_color'):
+        hexchat.set_pluginpref('lastfm_base_color', 'purple')
+    if not hexchat.get_pluginpref('lastfm_track_color'):
+        hexchat.set_pluginpref('lastfm_track_color', 'lightcyan')
+    if not hexchat.get_pluginpref('lastfm_artist_color'):
+        hexchat.set_pluginpref('lastfm_artist_color', 'pink')
+    if not hexchat.get_pluginpref('lastfm_album_color'):
+        hexchat.set_pluginpref('lastfm_album_color', 'lightgreen')
+    return
+        
+def nowPlaying(word, word_eol, userdata):
+    USER = hexchat.get_pluginpref('lastfm_user')
+    if USER:
         try:
-            r=requests.get(r'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&format=json' % (USER, APIKEY))
+            r=requests.get(r'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&format=json' % (USER, KEY))
             data = r.json()
             try:
                 nowplaying = data['recenttracks']['track'][0]['@attr']['nowplaying']
-                songName = data['recenttracks']['track'][0]['name']
-                songArtist = data['recenttracks']['track'][0]['artist']['#text']
-                songAlbum = data['recenttracks']['track'][0]['album']['#text']
-                if len(word) < 2:
-                    if songAlbum:
-                         songAlbum = ('\00306from \00309%s' % songAlbum)
-                    hexchat.command('me \00306now playing \00311%s \00306by \00313%s %s' % (songName, songArtist, songAlbum))
-                elif word[1].lower() == 'nocolor':
-                    if songAlbum:
-                         songAlbum = ('from %s' % songAlbum)
-                    hexchat.command('me now playing %s by %s %s' % (songName, songArtist, songAlbum))
-
+                track = data['recenttracks']['track'][0]['name']
+                artist = data['recenttracks']['track'][0]['artist']['#text']
+                album = data['recenttracks']['track'][0]['album']['#text']
+                if len(word) > 1 and word[1].lower() == 'plain':
+                    if album:
+                        hexchat.command('me now playing %s by %s from %s' % (track, artist, album))
+                    else:
+                        hexchat.command('me now playing %s by %s' % (track, artist))
+                else:
+                    bCol = '\003%s' % COLORS[hexchat.get_pluginpref('lastfm_base_color')]
+                    track = '\003%s%s%s' % (COLORS[hexchat.get_pluginpref('lastfm_track_color')], track, bCol)
+                    artist = '\003%s%s%s' % (COLORS[hexchat.get_pluginpref('lastfm_artist_color')], artist, bCol)
+                    if album:
+                        album = '\003%s%s%s' % (COLORS[hexchat.get_pluginpref('lastfm_album_color')], album, bCol)
+                        hexchat.command('me %snow playing %s by %s from %s' % (bCol, track, artist, album))
+                    else:
+                        hexchat.command('me %snow playing %s by %s' % (bCol, track, artist))
             except:
-                print('Last.FM: No song playing')
+                print('LastFM: No song playing')
         except:
-            print('Error: Cannot connect to Last.fm')
-    if not USER:
-        print('Use /lastfmuser set <last.fm username> to set a username for the plugin to fetch song data from')
-    if not APIKEY:
-        print('Use /lastfmapi set <last.fm API key> to set a API key for the plugin to fetch song data from')
+            print('LastFM: Cannot connect to Last.fm')
+    else:
+        print('LastFM: Username not found. %s' % HELPTEXT)
     return hexchat.EAT_ALL
 
-hexchat.hook_command('lastfm', lfmHelp, help='/np sends your currently playing song according to last.fm. Use /help lastfmuser and /help lastfmapi for configuration information.')
-hexchat.hook_command('lastfmuser', setUSER, help='/lastfmuser set <last.fm username> sets the username the plugin uses to fetch your song information. Use /lastfmuser reset to reset it.')
-hexchat.hook_command('lastfmapi', setKEY, help='/lastfmapi set <last.fm API key> sets the API key the plugin uses to fetch your song information. Use /lastfmapi reset to reset it.')
-hexchat.hook_command('np', lfm, help='/np sends your currently playing song according to last.fm.')
+def lastFM(word, word_eol, userdata):
+    try:
+        if word[1].lower() == 'help':
+            print('LastFM: You must set a last.fm username as user in order for this script to function.')
+            print('LastFM:  To change the value of any setting, \002/LastFM set <setting> <value>\017.')
+            print('LastFM:  To delete the value of any setting, \002/LastFM reset <setting>\017.')
+            print('LastFM:  To print the value of any setting, \002/LastFM print <setting>\017.')
+            print('LastFM:  To print the currently playing song of the chosen last.fm user, \002/np\017.')
+            print('LastFM:  To print the currently playing song without colors, \002/np plain\017.')
+            print('LastFM:  Available commands are:')
+            print('LastFM:   \02%s' % '\017, \02'.join(COMMANDS))
+            print('LastFM:  Available settings are:')
+            print('LastFM:   \02%s' % '\017, \02'.join(SETTINGS))
+            print('LastFM:  Available colors are:')
+            printColors = []
+            for k, v in COLORS.items():
+                printColors.append('\03%s%s' % (v, k))
+            print('LastFM:   \02%s' % '\017, \02'.join(printColors))
+        elif word[1].lower() in COMMANDS:
+            if word[2].lower() in SETTINGS:
+                key = word[2].lower()
+                prefKey = 'lastfm_%s' % key
+                keyReadable = ''
+                for l in key:
+                    if l == '_':
+                        keyReadable += ' '
+                    else:
+                        keyReadable += l
+                keyReadable = keyReadable.title()
+                if word[1].lower() == 'set':
+                    try:
+                        value = word[3]
+                        if 'color' in key and value.lower() not in mIrcCol.keys():
+                            print('LastFM: Unknown color \02%s\017. %s' % (value.lower(), HELPTEXT))
+                        else:
+                            hexchat.set_pluginpref(prefKey, value)
+                            print('LastFM: %s set to \002%s\017' % (key, value))
+                    except:
+                        print('LastFM: Syntax: \002/LastFM SET \037key\037 \037value\017. %s' % HELPTEXT)
+                elif word[1].lower() == 'reset':
+                    if hexchat.get_pluginpref(prefKey):
+                        prefValue = hexchat.get_pluginpref(prefKey)
+                        hexchat.del_pluginpref(prefKey)
+                        if 'color' in prefKey:
+                            defaultColors()
+                        print('LastFM: %s \002%s\017 removed.' % (keyReadable, prefValue))
+                    else:
+                        print('LastFM: Value for key \002%s\017 not found. %s' % (keyReadable, HELPTEXT))
+                elif word[1].lower() == 'print':
+                    prefValue = hexchat.get_pluginpref(prefKey)
+                    if hexchat.get_pluginpref(prefKey):
+                        print('LastFM: The value of %s is \002%s\017.' % (keyReadable, prefValue))
+                    else:
+                        print('LastFM: Value for key \002%s\017 not found. %s' % (keyReadable, HELPTEXT))
+            else:
+                print('LastFM: Unknown key \002%s\017. %s' % (word[2], HELPTEXT))
+        else:
+            print('LastFM: Unknown command \002%s\017. %s' % (word[1], HELPTEXT))
+    except:
+        print('LastFM: Not enough parameters. %s' % HELPTEXT)
+    return hexchat.EAT_ALL
+
+cleanOldVer()
+defaultColors()
+
+hexchat.hook_command('lastfm', lastFM, help=HELPTEXT)
+hexchat.hook_command('np', nowPlaying, help=HELPTEXT)
 
 def lfm_unloaded(userdata):
     hexchat.emit_print('Notice', '', '%s v%s by %s unloaded' % (__module_name__, __module_version__, __module_author__))
