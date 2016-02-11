@@ -6,7 +6,7 @@ except:
     print('LastFM: lastfm.py requres the requests python library. Link: http://docs.python-requests.org/en/latest/')
 
 __module_name__ = 'last.fm'
-__module_author__ = 'NewellWorldOrder'
+__module_author__ = 'newellworldorder'
 __module_version__ = '3.0'
 __module_description__ = 'Announces current song playing in Last.FM'
 
@@ -92,17 +92,11 @@ def lastFM(word, word_eol, userdata):
             if word[2].lower() in SETTINGS:
                 key = word[2].lower()
                 prefKey = 'lastfm_%s' % key
-                keyReadable = ''
-                for l in key:
-                    if l == '_':
-                        keyReadable += ' '
-                    else:
-                        keyReadable += l
-                keyReadable = keyReadable.title()
+                keyReadable = key.replace('_', ' ').title()
                 if word[1].lower() == 'set':
                     try:
-                        value = word[3]
-                        if 'color' in key and value.lower() not in mIrcCol.keys():
+                        value = word[3].lower()
+                        if 'color' in key and value.lower() not in COLORS.keys():
                             print('LastFM: Unknown color \02%s\017. %s' % (value.lower(), HELPTEXT))
                         else:
                             hexchat.set_pluginpref(prefKey, value)
