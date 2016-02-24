@@ -36,6 +36,24 @@ def defaultColors():
     if not hexchat.get_pluginpref('lastfm_album_color'):
         hexchat.set_pluginpref('lastfm_album_color', 'lightgreen')
     return
+
+def genHelp():
+    helpString = ('LastFM: You must set a last.fm username as user in order for this script to function.\n')
+    helpString += ('LastFM:  To change the value of any setting, \002/LastFM set <setting> <value>\017.\n')
+    helpString += ('LastFM:  To delete the value of any setting, \002/LastFM reset <setting>\017.\n')
+    helpString += ('LastFM:  To print the value of any setting, \002/LastFM print <setting>\017.\n')
+    helpString += ('LastFM:  To print the currently playing song of the chosen last.fm user, \002/np\017.\n')
+    helpString += ('LastFM:  To print the currently playing song without colors, \002/np plain\017.\n')
+    helpString += ('LastFM:  Available commands are:\n')
+    helpString += ('LastFM:   \02%s\n' % '\017, \02'.join(COMMANDS))
+    helpString += ('LastFM:  Available settings are:\n')
+    helpString += ('LastFM:   \02%s\n' % '\017, \02'.join(SETTINGS))
+    helpString += ('LastFM:  Available colors are:\n')
+    printColors = []
+    for k, v in COLORS.items():
+        printColors.append('\03%s%s' % (v, k))
+    helpString += ('LastFM:   \02%s' % '\017, \02'.join(printColors))
+    return helpString
         
 def nowPlaying(word, word_eol, userdata):
     USER = hexchat.get_pluginpref('lastfm_user')
@@ -73,21 +91,7 @@ def nowPlaying(word, word_eol, userdata):
 def lastFM(word, word_eol, userdata):
     try:
         if word[1].lower() == 'help':
-            print('LastFM: You must set a last.fm username as user in order for this script to function.')
-            print('LastFM:  To change the value of any setting, \002/LastFM set <setting> <value>\017.')
-            print('LastFM:  To delete the value of any setting, \002/LastFM reset <setting>\017.')
-            print('LastFM:  To print the value of any setting, \002/LastFM print <setting>\017.')
-            print('LastFM:  To print the currently playing song of the chosen last.fm user, \002/np\017.')
-            print('LastFM:  To print the currently playing song without colors, \002/np plain\017.')
-            print('LastFM:  Available commands are:')
-            print('LastFM:   \02%s' % '\017, \02'.join(COMMANDS))
-            print('LastFM:  Available settings are:')
-            print('LastFM:   \02%s' % '\017, \02'.join(SETTINGS))
-            print('LastFM:  Available colors are:')
-            printColors = []
-            for k, v in COLORS.items():
-                printColors.append('\03%s%s' % (v, k))
-            print('LastFM:   \02%s' % '\017, \02'.join(printColors))
+            print(genHelp())
         elif word[1].lower() in COMMANDS:
             if word[2].lower() in SETTINGS:
                 key = word[2].lower()
@@ -102,7 +106,7 @@ def lastFM(word, word_eol, userdata):
                             hexchat.set_pluginpref(prefKey, value)
                             print('LastFM: %s set to \002%s\017' % (key, value))
                     except:
-                        print('LastFM: Syntax: \002/LastFM SET \037key\037 \037value\017. %s' % HELPTEXT)
+                        print('LastFM: Syntax: \002/LastFM SET \037setting\037 \037value\017. %s' % HELPTEXT)
                 elif word[1].lower() == 'reset':
                     if hexchat.get_pluginpref(prefKey):
                         prefValue = hexchat.get_pluginpref(prefKey)
@@ -111,15 +115,15 @@ def lastFM(word, word_eol, userdata):
                             defaultColors()
                         print('LastFM: %s \002%s\017 removed.' % (keyReadable, prefValue))
                     else:
-                        print('LastFM: Value for key \002%s\017 not found. %s' % (keyReadable, HELPTEXT))
+                        print('LastFM: Value for setting \002%s\017 not found. %s' % (keyReadable, HELPTEXT))
                 elif word[1].lower() == 'print':
                     prefValue = hexchat.get_pluginpref(prefKey)
                     if hexchat.get_pluginpref(prefKey):
                         print('LastFM: The value of %s is \002%s\017.' % (keyReadable, prefValue))
                     else:
-                        print('LastFM: Value for key \002%s\017 not found. %s' % (keyReadable, HELPTEXT))
+                        print('LastFM: Value for setting \002%s\017 not found. %s' % (keyReadable, HELPTEXT))
             else:
-                print('LastFM: Unknown key \002%s\017. %s' % (word[2], HELPTEXT))
+                print('LastFM: Unknown setting \002%s\017. %s' % (word[2], HELPTEXT))
         else:
             print('LastFM: Unknown command \002%s\017. %s' % (word[1], HELPTEXT))
     except:
@@ -129,8 +133,8 @@ def lastFM(word, word_eol, userdata):
 cleanOldVer()
 defaultColors()
 
-hexchat.hook_command('lastfm', lastFM, help=HELPTEXT)
-hexchat.hook_command('np', nowPlaying, help=HELPTEXT)
+hexchat.hook_command('lastfm', lastFM, help=genHelp())
+hexchat.hook_command('np', nowPlaying, help=genHelp())
 
 def lfm_unloaded(userdata):
     hexchat.emit_print('Notice', '', '%s v%s by %s unloaded' % (__module_name__, __module_version__, __module_author__))
